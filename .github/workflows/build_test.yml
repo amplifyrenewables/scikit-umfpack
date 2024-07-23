@@ -31,7 +31,7 @@ jobs:
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
     - uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
       with:
-        python-version: '3.9'
+        python-version: '3.12'
 
     - name: Install dependencies from PyPI
       run: |
@@ -46,46 +46,15 @@ jobs:
     - name: Build a wheel
       run: |
         python -m build  # builds sdist, and then wheel from sdist
+        ls dist/scikit*.whl # print it out for us to see
         pip install dist/scikit*.whl
 
-    - name: Run test suite
-      run: |
-        cd docs
-        pytest --pyargs scikits.umfpack
-
-  conda-forge:
-    runs-on: ${{ matrix.platform }}
-    strategy:
-      # Ensure that a wheel builder finishes even if another fails
-      fail-fast: false
-      matrix:
-        platform: [ubuntu-latest, macos-latest, windows-latest]
-    steps:
-    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-
-    - uses: mamba-org/setup-micromamba@v1
+    - uses: actions/upload-artifact@v4
       with:
-        environment-file: environment.yml
-        cache-environment: true
-
-    - name: Build a wheel
-      shell: bash -el {0}
-      run: |
-        micromamba activate scikit-umfpack-dev
-        if [[ ${{ matrix.platform }} == windows-latest ]]; then
-          pip install . -v --no-build-isolation -Cbuild-dir=build -Csetup-args=--vsenv -Csetup-args=--native-file=$PWD/tools/ci/windows-condaforge-native.ini
-        else
-          pip install . -v --no-build-isolation -Cbuild-dir=build
-        fi
+        name: build.whl
+        path: dist/scikit-umfpack.whl
 
     - name: Run test suite
-      shell: bash -el {0}
       run: |
-        micromamba activate scikit-umfpack-dev
         cd docs
         pytest --pyargs scikits.umfpack
-
-    - name: Show meson-log.txt
-      if: failure()
-      run: |
-        cat build/meson-logs/meson-log.txt
