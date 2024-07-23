@@ -52,7 +52,7 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: build.whl
-        path: dist/scikit-umfpack.whl
+        path: dist/scikit_umfpack-0.4.1-cp312-cp312-linux_x86_64.whl
 
     - name: Run test suite
       run: |
