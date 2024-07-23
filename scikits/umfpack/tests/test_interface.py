@@ -193,7 +193,7 @@ class TestSolversWithArrays(unittest.TestCase):
     def test_solve_sparse_rhs(self):
         # Solve with UMFPACK: double precision, sparse rhs
         a = self.a.astype('d')
-        b = csc_array(self.b).T
+        b = csc_array(self.b.reshape(1, -1)).T
         x = um.spsolve(a, b)
         assert_allclose(a @ x, self.b)
 

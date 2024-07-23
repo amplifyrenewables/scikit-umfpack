@@ -193,7 +193,7 @@ class UmfpackLU(object):
                     SparseEfficiencyWarning)
 
         A.sort_indices()
-        A = A.asfptype()  # upcast to a floating point format
+        A = A._asfptype()  # upcast to a floating point format
 
         M, N = A.shape
         if (M != N):
@@ -264,7 +264,7 @@ class UmfpackLU(object):
         B = B.tocsc()
         cols = list()
         for j in xrange(B.shape[1]):
-            col = self.solve(B[:,j])
+            col = self.solve(B[:,[j]])
             cols.append(csc_matrix(col))
         return hstack(cols)
 
