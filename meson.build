@@ -12,6 +12,7 @@ fs = import('fs')
 py = import('python').find_installation(pure: false)
 
 cc = meson.get_compiler('c')
+add_project_arguments('-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION', language: 'c')
 
 swig = find_program('swig', required: true, native: true)
 

@@ -8,12 +8,19 @@
 
   Created by: Robert Cimrman
 */
+%{
+#define SWIG_FILE_WITH_INIT
+%}
+%include "numpy.i"
+%init %{
+    import_array();
+%}
 
 %{
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <umfpack.h>
 #include "numpy/arrayobject.h"
 %}
-
 
 %feature("autodoc", "1");
 
@@ -38,9 +45,6 @@ typedef SuiteSparse_long UF_long;
   $result = PyInt_FromLong((int)$1);
 }
 
-%init %{
-    import_array();
-%}
 
 %{
 /*!
@@ -116,9 +120,9 @@ PyArrayObject *helper_getCArrayObject( PyObject *input, int type,
 #define ARRAY_IN( rtype, ctype, atype ) \
 %typemap( in ) (ctype *array) { \
   PyArrayObject *obj; \
-  obj = helper_getCArrayObject( $input, PyArray_##atype, 1, 1 ); \
+  obj = helper_getCArrayObject( $input, NPY_##atype, 1, 1 ); \
   if (!obj) return NULL; \
-  $1 = (rtype *) obj->data; \
+  $1 = (rtype *) PyArray_DATA(obj); \
   Py_DECREF( obj ); \
 };
 
@@ -129,14 +133,14 @@ PyArrayObject *helper_getCArrayObject( PyObject *input, int type,
 #define CONF_IN( arSize ) \
 %typemap( in ) (double conf [arSize]) { \
   PyArrayObject *obj; \
-  obj = helper_getCArrayObject( $input, PyArray_DOUBLE, 1, 1 ); \
+  obj = helper_getCArrayObject( $input, NPY_DOUBLE, 1, 1 ); \
   if (!obj) return NULL; \
-  if ((obj->nd != 1) || (obj->dimensions[0] != arSize)) { \
+  if ((PyArray_NDIM(obj) != 1) || (PyArray_DIMS(obj)[0] != arSize)) { \
     PyErr_SetString( PyExc_ValueError, "wrong Control/Info array size" ); \
     Py_DECREF( obj ); \
     return NULL; \
   } \
-  $1 = (double *) obj->data; \
+  $1 = (double *) PyArray_DATA(obj); \
   Py_DECREF( obj ); \
 };
 
